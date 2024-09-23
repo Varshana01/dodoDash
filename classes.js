@@ -84,30 +84,35 @@ class Dodo {
         this.x += this.velocityX;
         this.y += this.velocityY;
         this.velocityY += this.gravity;
-
+    
         // Prevent Dodo from going out of bounds horizontally
         if (this.x < 0) {
             this.x = 0;
         } else if (this.x + this.width > canvasWidth) {
             this.x = canvasWidth - this.width;
         }
-
+    
         // Check if Dodo lands on any platform
         let onPlatform = false;
         platforms.forEach(platform => {
             if (platform.checkLanding(this)) {
-                this.y = platform.y - this.height + platform.topMargin; // Adjust for top margin on platforms only
+                this.y = platform.y - this.height + platform.topMargin; // Adjust for top margin on platforms
                 this.isJumping = false;
-                this.velocityY = 0;
+                this.velocityY = 0; // Stop the fall when on the platform
                 onPlatform = true;
             }
         });
-
-        // If not on any platform and Dodo reaches the ground, land on the ground (without applying topMargin)
+    
+        // If the Dodo is not on any platform and it reaches the ground
         if (!onPlatform && this.y + this.height >= groundLevel) {
-            this.y = groundLevel - this.height ; // Land on the ground
+            this.y = groundLevel - this.height; // Land on the ground
             this.isJumping = false;
             this.velocityY = 0;
+        }
+    
+        // If the Dodo is not on any platform and hasn't reached the ground, keep falling
+        if (!onPlatform && this.y + this.height < groundLevel) {
+            this.isJumping = true; // Still falling
         }
     }
 
@@ -141,33 +146,36 @@ class Platform {
         this.height = height;
         this.image = new Image();
         this.image.src = imageSrc;
-
-        // Define margins to ignore empty spaces around the block
         this.leftMargin = leftMargin;
         this.rightMargin = rightMargin;
-        this.topMargin = topMargin;  // The margin at the top of the platform
+        this.topMargin = topMargin;
+        
+        // Add a fruit to each platform
+        this.fruit = new Fruit(this.x + this.width / 2 - 25, this.y - 50, 50, 50, 'berry.png');  // Fruit centered on the platform
+        this.addFruit = new Fruit(825, 150-50, 50, 50 , "banana.png" )
     }
 
     draw(ctx) {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        this.fruit.draw(ctx);  // Draw the fruit on the platform
+        this.addFruit.draw(ctx);
     }
 
     checkLanding(dodo) {
         const dodoBottom = dodo.y + dodo.height;
         const dodoRight = dodo.x + dodo.width;
         const dodoLeft = dodo.x;
-
-        // Adjust platform boundaries based on margins
         const effectiveX = this.x + this.leftMargin;
         const effectiveWidth = this.width - this.leftMargin - this.rightMargin;
         const effectiveY = this.y + this.topMargin;
-
+    
+        // Dodo lands if its bottom is just above the platform's top within a small margin (e.g., 5 pixels)
         return (
-            dodoBottom >= effectiveY &&                  // Dodo's bottom reaches the effective platform's Y
-            dodoBottom <= effectiveY + 10 &&             // Adding a small tolerance for the landing check
-            dodo.velocityY > 0 &&                        // Dodo is falling
-            dodoRight >= effectiveX &&                   // Dodo's right edge is past the effective platform's left edge
-            dodoLeft <= effectiveX + effectiveWidth      // Dodo's left edge is before the effective platform's right edge
+            dodoBottom >= effectiveY - 5 &&  // Dodo's bottom is near the top of the platform
+            dodoBottom <= effectiveY + 5 &&  // Dodo's bottom is not too far below the top of the platform
+            dodo.velocityY > 0 &&            // Dodo is falling
+            dodoRight >= effectiveX &&       // Dodo's right side is within the platform's left edge
+            dodoLeft <= effectiveX + effectiveWidth  // Dodo's left side is within the platform's right edge
         );
     }
 }
@@ -235,6 +243,32 @@ class Dutchman {
 }
 
 
+class Fruit {
+    constructor(x, y, width, height, imageSrc) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.image = new Image();
+        this.image.src = imageSrc;
+        this.collected = false;  // To track if the fruit has been collected
+    }
+
+    draw(ctx) {
+        if (!this.collected) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        }
+    }
+
+    checkCollision(dodo) {
+        return (
+            dodo.x + dodo.width > this.x &&  // Dodo's right edge > Fruit's left edge
+            dodo.x < this.x + this.width &&  // Dodo's left edge < Fruit's right edge
+            dodo.y + dodo.height > this.y &&  // Dodo's bottom edge > Fruit's top edge
+            dodo.y < this.y + this.height  // Dodo's top edge < Fruit's bottom edge
+        );
+    }
+}
 
 
 class Game {
@@ -242,8 +276,7 @@ class Game {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         this.level = 1;
-
-        // Load assets (sprites and background)
+        this.highScore = 0;  // High score starts at 0
         this.background = new Image();
         this.background.src = 'background_lvl1.png';
         this.rightWalkSprite = new Image();
@@ -252,19 +285,11 @@ class Game {
         this.leftWalkSprite.src = 'rightwalkdodo.png';
         this.jumpSprite = new Image();
         this.jumpSprite.src = 'rightwalkdodo.png';
-
-        // Initialize Dutchman and Dodo
         this.dutchman = new Dutchman(380, 350, 200, 220, 'dutch.png');
         this.dodo = new Dodo(50, 500, this.rightWalkSprite, this.leftWalkSprite, this.jumpSprite);
-
-        // Create platforms for the level
         this.platforms = this.createPlatformsForLevel(this.level);
-
-        // Set up keyboard input
         this.keys = {};
         this.setupKeyboardListeners();
-
-        // Start the game loop
         this.start();
     }
 
@@ -320,14 +345,28 @@ class Game {
             this.dodo.jump();
         }
 
-        // Update Dutchman's position (marching back and forth)
+        // Update Dutchman's position
         this.dutchman.update();
 
         // Check for collision between Dodo and Dutchman
         if (this.dodo.checkCollision(this.dutchman)) {
-            this.dodo.isAlive = false; // Dodo dies on collision
+            this.dodo.isAlive = false;
             this.showGameOverModal();
         }
+
+        // Check for collision between Dodo and fruits
+        this.platforms.forEach(platform => {
+            if (platform.fruit.checkCollision(this.dodo) && !platform.fruit.collected) {
+                platform.fruit.collected = true;  // Mark the fruit as collected
+                this.highScore += 50;  // Increase high score by 50
+                console.log("High Score:", this.highScore);  // For debugging
+            }
+            if (platform.addFruit.checkCollision(this.dodo) && !platform.addFruit.collected) {
+                platform.addFruit.collected = true;  // Mark the fruit as collected
+                this.highScore += 100;  // Increase high score by 100
+                console.log("High Score:", this.highScore);  // For debugging
+            }
+        });
 
         // Level transition
         if (this.dodo.x + this.dodo.width > this.canvas.width && this.level === 1) {
@@ -341,7 +380,12 @@ class Game {
         this.ctx.drawImage(this.background, 0, 0, this.canvas.width, this.canvas.height);
         this.platforms.forEach(platform => platform.draw(this.ctx));
         this.dodo.draw(this.ctx);
-        this.dutchman.draw(this.ctx); // Draw Dutchman
+        this.dutchman.draw(this.ctx);
+
+        // Display high score
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText('High Score: ' + this.highScore, 10, 30);
     }
 
     showGameOverModal() {
@@ -358,8 +402,9 @@ class Game {
     }
 }
 
-
 // Initialize the game
 window.onload = () => {
     const game = new Game('gameCanvas');
 };
+
+
