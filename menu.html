@@ -1,0 +1,68 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <div class="Group1" style="width: 1000px; height: 768px; position: relative">
+        <div class="PopupButton" style="width: 94px; height: 51px; padding-top: 1px; padding-bottom: 1px; left: 456.51px; top: 197.30px; position: absolute; transform: rotate(5.35deg); transform-origin: 0 0; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+          <div class="Label" style="color: #603208; font-size: 96px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Start</div>
+        </div> 
+        <div class="PopupButton" style="width: 316.56px; height: 61.53px; padding-top: 13px; padding-bottom: 13px; left: 386.50px; top: 648px; position: absolute; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+          <div class="Label" style="color: #603208; font-size: 96px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Settings</div>
+        </div>
+        <div class="PopupButton" style="width: 462.87px; height: 51.81px; padding-top: 13px; padding-bottom: 13px; left: 508px; top: 502.42px; position: absolute; transform: rotate(-4.85deg); transform-origin: 0 0; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+          <div class="Label" style="color: #603208; font-size: 96px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Instructions</div>
+        </div>
+        <img class="Mainmenu031" style="width: 1000px; height: 600px; left: 0px; top: 0px; " src="mainmenu03.png" />
+      </div>
+    
+</body> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodo Dash</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        
+        <div class="menu">
+            <div class="PopupButton" style="width: 94px; height: 51px; padding-top: 1px; padding-bottom: 1px; left: 580px; top: 237.30px; position: absolute; transform: rotate(5.35deg); transform-origin: 0 0; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+                <button class="menu-btn" onclick="startGame()" style="color: #603208; font-size: 75px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Start</button>
+            </div>
+            <div class="PopupButton" style="width: 94px; height: 51px; padding-top: 1px; padding-bottom: 1px; left: 490.51px; top: 380px; position: absolute;transform: rotate(-4.85deg); transform-origin: 0 0; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+                <button class="menu-btn" onclick="showInstructions()" style="color: #603208; font-size: 70px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Instructions</button>
+            </div>
+            <div class="PopupButton" style="width: 462.87px; height: 51px; padding-top: 13px; padding-bottom: 13px; left: 538px; top: 485.42px; position: absolute; transform-origin: 0 0; justify-content: flex-start; align-items: flex-start; gap: 3px; display: inline-flex">
+                <button class="menu-btn" onclick="openSettings()" style="color: #603208; font-size: 75px; font-family: Passero One; font-weight: 400; line-height: 18px; word-wrap: break-word">Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function startGame() {
+            
+            window.location.href = "index.html";
+
+        }
+
+        function showInstructions() {
+            window.location.href = "instructions.html";
+
+        }
+
+        function openSettings() {
+            alert('Settings clicked');
+        }
+    </script>
+</body>
+</html>
+
+</html>
